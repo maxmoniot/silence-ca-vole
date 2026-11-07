@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Silence, ça vole !</title>
+<meta name="description" content="Rejoignez Max, cadreur sur un drone : tout voir, tout comprendre, tout filmer. Un jeu Android en pixel art.">
+<link rel="icon" href="icone.png">
+<style>
+  /* sombre par defaut ; clair seulement si on le demande (data-theme="light") */
+  :root { --bg: #14131c; --ink: #f2ecd8; --ink2: #a8a3b8; --line: #2f2c3e; --or: #ffe27a; --rouge: #c8393b; }
+  :root[data-theme="light"] { --bg: #f6f3ea; --ink: #17151f; --ink2: #5a5668; --line: #d8d2c2; --or: #8a6414; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 640px; margin: 0 auto; padding: 48px 16px 64px; text-align: center; }
+  img { width: 128px; height: 128px; image-rendering: pixelated; border-radius: 24px; }
+  h1 { font-size: 32px; margin: 20px 0 6px; color: var(--or); }
+  p { color: var(--ink2); margin: 0 0 28px; }
+  .jouer { display: inline-block; background: var(--rouge); color: #fff; text-decoration: none; font-weight: 700;
+           padding: 14px 28px; border-radius: 8px; border: 2px solid #17151f; }
+  footer { margin-top: 48px; font-size: 14px; } footer a { color: var(--ink2); }
+</style>
+</head>
+<body>
+<main>
+  <img src="icone.png" alt="">
+  <h1>Silence, ça vole !</h1>
+  <p>Rejoignez Max, cadreur sur un drone : tout voir, tout comprendre, tout filmer.</p>
+  <a class="jouer" href="https://play.google.com/store/apps/details?id=fr.maxmoniot.silencecavole">Sur Google Play</a>
+  <footer><a href="confidentialite.html">Règles de confidentialité</a> · max.moniot@gmail.com</footer>
+</main>
+</body>
+</html>
