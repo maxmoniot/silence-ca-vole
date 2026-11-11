@@ -2570,7 +2570,7 @@
     { k: 'bobines', n: 'Ramasser {n} bobines' },
     { k: 'ras', n: 'Voler {n} s au ras du sol' },
     { k: 'surf', n: 'Surfer sur {n} baleines' },
-    { k: 'grosses', n: 'Prendre {n} grosses bobines' },
+    { k: 'grosses', n: 'Gober {n} grosses bobines' },
     { k: 'tortues', n: 'Saluer {n} tortues copines' },
     { k: 'plonge', n: 'Plonger {n} fois' },
     { k: 'pouvoirs', n: 'Prendre {n} bonus' },
@@ -2588,7 +2588,9 @@
     { k: 'combo', n: 'Faire un combo de {n}' },
     { k: 'boss', n: 'Filmer {n} animaux rares' },
     { k: 'barrage', n: 'Survivre à {n} barrages' },
-    { k: 'sousEau', n: 'Parcourir {n} m sous l\'eau' },
+    // (« Gober » et « Nager » depuis les paliers, 11/11/2026 : « Prendre 3 430 grosses bobines » et « Parcourir 206 000 m sous
+    // l'eau » debordaient de leur rangee de la carriere en fin de carriere, tests/objectifs_echelle.js)
+    { k: 'sousEau', n: 'Nager {n} m sous l\'eau' },
     { k: 'sansChoc', n: 'Parcourir {n} m sans choc' },
   ];
   /* Ce que demande un objectif (11/11/2026). Max : « plusieurs beta testeurs qui ont relativement peu joue sont deja au niveau Palme
@@ -2689,11 +2691,25 @@
     return objectif(p, n || butPour(k, [2500, 15000, D_MISSION][niv] || D_MISSION), niv);
   };
   // l'objectif d'une sorte qui demande ce que le joueur fait sur d metres de jeu (un record : le barreau suivant de son echelle)
+  /* Les paliers (11/11/2026 ; Max : « je pensais que chaque mission n'etait gagnable qu'une seule fois ») : un objectif se compte
+     depuis le debut (le total du joueur, sorte par sorte : G.sav.act, G.sav.actDist) ; celui qui le remplace part de ce total et
+     demande le meme effort de plus. Un objectif gagne ne revient donc jamais a l'identique, le suivant de la meme sorte est toujours
+     plus grand (« Ramasser 21 000 bobines », puis « Ramasser 42 000 bobines »...), jamais en dessous du dernier gagne
+     (G.sav.paliers). m.d0 : le total au depart du palier (la barre de la carriere montre ce palier, ui.js). Les records (combo,
+     distance sans choc) etaient deja ainsi. */
+  const total = k => k === 'dist' ? (G.sav.actDist || 0) : ((G.sav.act || {})[k] || 0);
+  const pas = v => v < 12 ? 1 : v < 100 ? 5 : v < 1000 ? 10 : Math.pow(10, Math.floor(Math.log10(v)) - 1);
+  const palier = (k, n) => {
+    const t0 = Math.max(total(k), (G.sav.paliers || {})[k] || 0), s = pas(n);
+    return { d0: t0, but: Math.max(t0 + 1, Math.round((t0 + n) / s) * s) };
+  };
   const missionPour = J.missionPour = (k, d) => {
     const p = POOL.find(q => q.k === k);
     if (!p) return null;
     if (RECORDS[k]) { const n = (G.sav.recM || {})[k] || 0; return objectif(p, butPour(k), n === 0 ? 0 : n < 4 ? 1 : 2); }
-    return objectif(p, butPour(k, d), nivDe(d));
+    const q = palier(k, butPour(k, d)), m = objectif(p, q.but, nivDe(d));
+    m.p = m.d0 = q.d0;
+    return m;
   };
   // les sortes qu'on peut tirer : chacune une seule fois dans la liste, et plus de « Decouvrir » quand tout est decouvert
   const tirables = sauf => POOL.map(p => p.k).filter(k => !sauf.includes(k) && (k !== 'decors' || restants() > 0));
@@ -2743,9 +2759,19 @@
           m = missionPour(m.k, 0); m.p = a.p; return m;
         }
         // ce qui est deja fait compte, sans payer d'office un objectif du jour (au plus les neuf dixiemes)
-        m.p = Math.min(a.p, Math.floor(m.but * .9)); return m;
+        m.p = m.d0 + Math.min(a.p, Math.floor((m.but - m.d0) * .9)); return m;
       });
       G.sav.missions = faits.concat(neufs);
+    }
+    // une fois (1.26) : les objectifs de la 1.24 et de la 1.25, comptes depuis leur tirage, passent en paliers (meme effort qui reste)
+    if (!G.sav.objectifs3) {
+      G.sav.objectifs3 = 1;
+      for (const m of G.sav.missions) {
+        if (RECORDS[m.k] || m.d0 !== undefined) continue;
+        const d0 = Math.max(0, total(m.k) - (m.p || 0)), p = POOL.find(q => q.k === m.k);
+        m.d0 = d0; m.p = (m.p || 0) + d0; m.but += d0;
+        if (p) m.txt = texteMission(p, m.but);
+      }
     }
     J.normaliserMissions();
     let n = 0;
@@ -2805,8 +2831,9 @@
     const finies = G.sav.missions.filter(m => m.fait);
     for (const m of finies) {
       G.gagne(m.r); G.sav.rang++; W.xpMissions = (W.xpMissions || 0) + (m.xp || xpMission(m.k, m.niv));
-      // un record battu : le suivant demande plus
+      // un record battu : le suivant demande plus ; un palier gagne : le suivant de la meme sorte part au-dessus
       if (RECORDS[m.k]) { const r = G.sav.recM || (G.sav.recM = {}); r[m.k] = (r[m.k] || 0) + 1; }
+      else { const q = G.sav.paliers || (G.sav.paliers = {}); q[m.k] = Math.max(q[m.k] || 0, m.but); }
     }
     G.sav.missions = G.sav.missions.filter(m => !m.fait);
     J.completerMissions();

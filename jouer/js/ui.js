@@ -635,7 +635,8 @@
       if (my > bas || my + 22 < haut) return;
       x.fillStyle = K; x.fillRect(mx - 1, my - 1, mw + 2, 22);
       x.fillStyle = '#23222e'; x.fillRect(mx, my, mw, 20);
-      const p = m.p ? clamp(m.p / m.but, 0, 1) : 0;
+      // un palier : la barre montre ce palier, depuis le total du joueur a son depart (m.d0, game.js)
+      const d0 = m.d0 || 0, p = m.but > d0 ? clamp(((m.p || 0) - d0) / (m.but - d0), 0, 1) : 0;
       x.fillStyle = '#2f6f4f'; x.fillRect(mx, my, mw * p, 20);
       // une rangee qui passe sous l'en-tete : son fond glisse dessous, ses textes ne s'ecrivent plus (ils seraient coupes)
       if (my + 4 < haut - 2) return;
