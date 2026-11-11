@@ -7,6 +7,14 @@
 <meta name="description" content="Rejoignez Max, cadreur sur un drone : tout voir, tout comprendre, tout filmer. Un jeu en pixel art, sur Android, iPhone et iPad.">
 <link rel="icon" href="icone.png">
 <link rel="apple-touch-icon" href="jouer/icones/icone-180.png">
+<script>
+  // un iPhone ou un iPad va droit au jeu, qui lui propose d'ajouter son icône sur l'écran d'accueil (« ?reste » garde cette page)
+  (function () {
+    var ua = navigator.userAgent || '';
+    var ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    if (ios && !/[?&]reste(=|&|$)/.test(location.search)) location.replace('jouer/');
+  })();
+</script>
 <style>
   /* sombre par defaut ; clair seulement si on le demande (data-theme="light") */
   :root { --bg: #14131c; --ink: #f2ecd8; --ink2: #a8a3b8; --line: #2f2c3e; --or: #ffe27a; --rouge: #c8393b; }

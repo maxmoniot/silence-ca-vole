@@ -35,6 +35,9 @@
   #installer li b{display:block;color:#ffe27a;font-size:13px;margin-bottom:4px}
   #installer button{font:bold 17px -apple-system,system-ui,sans-serif;color:#fff;background:#c8393b;border:2px solid #17151f;
     border-radius:10px;padding:12px 26px}
+  #installer .appli{display:none;margin:0 0 14px;padding:10px 12px;border:1px solid #ffe27a;border-radius:12px;font-size:15px}
+  #installer.dans-appli .appli{display:block}
+  #installer .appli b{color:#ffe27a}
   @media (orientation:landscape) and (max-height:430px){#installer img{width:64px;height:64px}#installer h1{margin:6px 0 10px;font-size:20px}
     #installer ol{margin-bottom:12px}#installer .boite{max-width:560px;padding:10px}}
 </style>
@@ -46,6 +49,7 @@
 <div id="installer" role="dialog" aria-label="Installer le jeu"><div class="boite">
   <img src="icones/icone-180.png" alt="">
   <h1>Silence, ça vole !</h1>
+  <p class="appli">D'abord, ouvrez ce lien dans <b>Safari</b> :<br><b>⋯</b> puis « Ouvrir dans le navigateur »</p>
   <ol>
     <li><svg viewBox="0 0 32 32" fill="none" stroke="#ffe27a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3v17M10 9l6-6 6 6"/><path d="M11 14H7v15h18V14h-4"/></svg><b>1</b>Partager<br><small>(ou ⋯ puis Partager)</small></li>
     <li><svg viewBox="0 0 32 32" fill="none" stroke="#ffe27a" stroke-width="2.4" stroke-linecap="round"><rect x="4" y="4" width="24" height="24" rx="6"/><path d="M16 10v12M10 16h12"/></svg><b>2</b>Sur l'écran d'accueil</li>

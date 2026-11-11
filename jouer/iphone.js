@@ -19,6 +19,7 @@
   const ua = navigator.userAgent || '';
   // l'iPad se présente comme un Mac depuis iPadOS 13 : un « Mac » tactile est un iPad
   I.ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  I.dansAppli = /FBAN|FBAV|FB_IAB|Instagram|Snapchat|musical_ly|Bytedance|TikTok|Line\/|LinkedInApp|Pinterest|GSA\//.test(ua);
   I.installe = navigator.standalone === true || (window.matchMedia && matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches);
 
   /* 1. Encoches */
@@ -110,6 +111,8 @@
     let vu = false;
     try { vu = sessionStorage.getItem('scv.jouerIci') === '1'; } catch (e) { /* navigation privée */ }
     if (I.ios && !I.installe && !vu) f.classList.add('ouvert');
+    // le navigateur d'une appli (Instagram, Facebook, TikTok, Snapchat, Google…) n'a pas « Sur l'écran d'accueil » : d'abord Safari
+    if (I.dansAppli) f.classList.add('dans-appli');
     document.getElementById('jouer-ici').addEventListener('click', () => {
       f.classList.remove('ouvert');
       try { sessionStorage.setItem('scv.jouerIci', '1'); } catch (e) { /* rien */ }
