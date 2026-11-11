@@ -2604,7 +2604,11 @@
      - au depart, les vingt-quatre sont etages de 1,5 km a 96 km (ECHELLE) : le premier vient des la premiere partie (le premier rang),
        puis un par partie, puis un toutes les deux ou trois ; le niveau (et donc l'experience, J.XP_MISSION) suit la distance demandee
        (nivDe : moins de 8 km, moins de 30 km, au-dela) ;
-     - le combo et la distance sans choc se battent en une partie : ce sont des records, qui montent a chaque reussite (RECORDS). */
+     - le combo et la distance sans choc se battent en une partie : ce sont des records, qui montent a chaque reussite (RECORDS) et
+       demandent toujours 20 % de plus que le meilleur deja fait (G.sav.recBest ; Max, 11/11/2026, apres la 1.24 : « il y a peut-etre
+       une mission qui debloque beaucoup d'XP […] une moyenne de score de 3000 m » : sur l'ancien jeu, la distance sans choc etait la
+       plus rentable, 20 % de l'experience des objectifs d'un joueur a 3 000 m ; dans la 1.24, elle et le combo en faisaient encore
+       les deux tiers, un barreau par partie). */
   // une partie moyenne de 2 500 m, entre ce que fait le robot prudent de tests/xp_nouveau_joueur.js --activite et un joueur qui va
   // chercher bobines, lettres et bonus (tests/paliers_xp.js)
   const PARTIE = {
@@ -2616,6 +2620,8 @@
     61000, 66000, 71000, 76000, 81000, 86000, 91000, 96000];
   // les sortes qui avancent dans toute partie prennent les premiers barreaux de l'echelle (une baleine ou une tortue, ce n'est pas sur)
   const COURANTES = ['dist', 'bobines', 'frole', 'renverses', 'plans', 'barrage', 'decors', 'detruit', 'ras'];
+  // et les rares, qui varient beaucoup d'un joueur a l'autre (ACTION vaut 4 000 xp), les derniers : tombes tot, ils faisaient des sauts
+  const RARES = ['action', 'surf', 'tortues', 'boss', 'sousEau', 'plonge'];
   const RECORDS = J.RECORDS = { combo: [4, 5, 6, 8, 10, 12, 15, 18, 22, 26, 30], sansChoc: [500, 700, 900, 1200, 1500, 2000, 2500, 3200, 4000, 5000, 6500] };
   const nivDe = metres => metres < 8000 ? 0 : metres < 30000 ? 1 : 2;
   // ce que ce joueur fait, par metre de jeu, pour une sorte (dix kilometres de partie moyenne au depart, que sa mesure remplace peu a peu)
@@ -2633,7 +2639,13 @@
     return Object.keys(G.SCENES).filter(id => !vus[id] && !G.SCENES[id].debut && (!meta || meta[G.SCENES[id].plaque || id])).length;
   };
   const butPour = J.butPour = (k, d) => {
-    if (RECORDS[k]) { const l = RECORDS[k], n = (G.sav.recM || {})[k] || 0; return n < l.length ? l[n] : joli(l[l.length - 1] * Math.pow(1.2, n - l.length + 1)); }
+    if (RECORDS[k]) {
+      // un record : le barreau suivant de son echelle, et toujours 20 % de plus que le meilleur deja fait en une partie (G.sav.recBest :
+      // un bon joueur qui fait 3 000 m sans choc ne gravit plus l'echelle d'un barreau a chaque partie, tests/xp_nouveau_joueur.js --dist)
+      const l = RECORDS[k], n = (G.sav.recM || {})[k] || 0, b = (G.sav.recBest || {})[k] || 0;
+      const e = n < l.length ? l[n] : joli(l[l.length - 1] * Math.pow(1.2, n - l.length + 1));
+      return b > 0 ? Math.max(e, joli(b * 1.2), Math.floor(b) + 1) : e;
+    }
     const n = joli(parMetre(k) * d);
     return k === 'decors' ? Math.max(1, Math.min(n, restants())) : n;
   };
@@ -2685,15 +2697,27 @@
   };
   // les sortes qu'on peut tirer : chacune une seule fois dans la liste, et plus de « Decouvrir » quand tout est decouvert
   const tirables = sauf => POOL.map(p => p.k).filter(k => !sauf.includes(k) && (k !== 'decors' || restants() > 0));
+  /* Un objectif qui en remplace un autre demande de 75 % a 125 % de D_MISSION, et se place la ou aucun objectif en cours n'arrive
+     (ce qu'il reste a chacun, en metres au rythme du joueur) : plusieurs objectifs reussis la meme partie, c'est un saut d'un coup. */
   function nouvelleMission() {
     const l = tirables((G.sav.missions || []).map(m => m.k));
-    return l.length ? missionPour(pick(l), D_MISSION * (.75 + Math.random() * .5)) : null;
+    if (!l.length) return null;
+    const k = pick(l);
+    if (RECORDS[k]) return missionPour(k, 0);
+    const arrivees = (G.sav.missions || []).filter(m => !m.fait && !RECORDS[m.k]).map(m => Math.max(0, m.but - (m.p || 0)) / parMetre(m.k));
+    let d = D_MISSION, ecart = -1;
+    for (let j = 0; j <= 12; j++) {
+      const c = D_MISSION * (.75 + .5 * j / 12), e = arrivees.reduce((a, r) => Math.min(a, Math.abs(r - c)), 1e9) + Math.random() * 800;
+      if (e > ecart) { ecart = e; d = c; }
+    }
+    return missionPour(k, d);
   }
   const melange = l => l.map(k => [Math.random(), k]).sort((a, b) => a[0] - b[0]).map(q => q[1]);
   // l'echelle du depart : les sortes les plus courantes sur les premiers barreaux, chacune demande la distance de son barreau
   function etager(sortes) {
-    const c = melange(sortes.filter(k => COURANTES.includes(k))), a = melange(sortes.filter(k => !COURANTES.includes(k)));
-    return c.concat(a).map((k, i) => missionPour(k, ECHELLE[Math.min(i, ECHELLE.length - 1)]));
+    const c = melange(sortes.filter(k => COURANTES.includes(k))), r = melange(sortes.filter(k => RARES.includes(k)));
+    const a = melange(sortes.filter(k => !COURANTES.includes(k) && !RARES.includes(k)));
+    return c.concat(a, r).map((k, i) => missionPour(k, ECHELLE[Math.min(i, ECHELLE.length - 1)]));
   }
   /* Douze missions en meme temps (Max, 08/11/2026 : « fais en sorte que les actions qui font gagner des XP soient une liste qu'on peut
      faire defiler (pour le moment il n'y en a que 3). Il faudrait qu'il y en ait au moins 12 ») : douze sortes differentes sur les
@@ -2714,8 +2738,8 @@
         if (!a || !(a.p > 0)) return m;
         // un record : son echelle commence au-dessus du meilleur deja fait (sinon il serait reussi d'office)
         if (RECORDS[m.k]) {
-          const r = G.sav.recM || (G.sav.recM = {});
-          let n = 0; while (butPour(m.k) <= a.p && n++ < 40) r[m.k] = (r[m.k] || 0) + 1;
+          const rb = G.sav.recBest || (G.sav.recBest = {});
+          rb[m.k] = Math.max(rb[m.k] || 0, a.p);
           m = missionPour(m.k, 0); m.p = a.p; return m;
         }
         // ce qui est deja fait compte, sans payer d'office un objectif du jour (au plus les neuf dixiemes)
@@ -2755,7 +2779,11 @@
   }
   // ce qui se mesure d'un trait dans la partie (le plus long combo, le plus long passage sans choc) : on garde le meilleur
   function missionMax(k, v) {
-    if (W.demo || !G.sav.missions) return;
+    if (W.demo) return;
+    // le meilleur de toutes les parties : le record suivant demande de le battre (butPour)
+    const b = G.sav.recBest || (G.sav.recBest = {});
+    if (v > (b[k] || 0)) b[k] = v;
+    if (!G.sav.missions) return;
     for (const m of G.sav.missions) {
       if (m.k !== k || m.fait || v <= m.p) continue;
       m.p = v;
