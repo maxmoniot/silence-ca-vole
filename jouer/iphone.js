@@ -72,6 +72,12 @@
   document.addEventListener('contextmenu', e => e.preventDefault());
   // l'écran du jeu ne défile jamais (dans Safari, un glissé ferait bouger la page et ses barres) ; la fenêtre d'installation, si
   document.addEventListener('touchmove', e => { if (!e.target.closest || !e.target.closest('#installer')) e.preventDefault(); }, { passive: false });
+  // un doigt sur la fenêtre d'installation n'arrive pas au jeu : le jeu écoute les appuis sur toute la page et, en paysage, les
+  // annule (preventDefault), et Safari ne fait alors plus de clic : « Jouer ici » ne répondait pas au doigt, et l'appui touchait
+  // le jeu caché dessous. Arrêté à la fenêtre (window, phase de capture), avant l'écoute du jeu sur document.
+  for (const ev of ['pointerdown', 'pointermove', 'pointerup', 'pointercancel']) {
+    window.addEventListener(ev, e => { if (e.target.closest && e.target.closest('#installer')) e.stopPropagation(); }, true);
+  }
 
   /* 4. L'écran allumé */
   function garderEcran() {
