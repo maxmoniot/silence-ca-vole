@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Silence, ça vole !</title>
+<meta name="description" content="Rejoignez Max, cadreur sur un drone : tout voir, tout comprendre, tout filmer.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Silence ça vole">
+<meta name="theme-color" content="#0a0a10">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icones/icone-180.png">
+<link rel="icon" href="icones/icone-192.png">
+<style>
+  html,body{margin:0;height:100%;background:#0a0a10;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none}
+  #jeu{position:fixed;top:0;right:0;bottom:0;left:0;width:100vw;height:100vh;display:block;image-rendering:pixelated;image-rendering:crisp-edges;image-rendering:pixelated;touch-action:none}
+  #tourne{display:none;position:fixed;top:0;right:0;bottom:0;left:0;align-items:center;justify-content:center;color:#ffe27a;font:bold 20px monospace;background:#0a0a10;text-align:center}
+  @media (orientation:portrait){#tourne{display:flex}}
+  html,body{-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
+  #sonde{position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;pointer-events:none;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+  #installer{display:none;position:fixed;top:0;right:0;bottom:0;left:0;z-index:10;background:#0a0a10;color:#f2ecd8;
+    font:16px/1.4 -apple-system,system-ui,sans-serif;align-items:center;justify-content:center;text-align:center;overflow:auto;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+  #installer.ouvert{display:flex}
+  #installer .boite{max-width:420px;padding:20px}
+  #installer img{width:96px;height:96px;border-radius:22px;image-rendering:pixelated}
+  #installer h1{font-size:24px;margin:12px 0 18px;color:#ffe27a}
+  #installer ol{list-style:none;padding:0;margin:0 0 22px;display:flex;gap:10px;justify-content:center;align-items:stretch}
+  #installer li{flex:1;background:#1c1b28;border:1px solid #2f2c3e;border-radius:12px;padding:12px 6px;font-size:14px}
+  #installer li svg{display:block;margin:0 auto 6px;width:32px;height:32px}
+  #installer li b{display:block;color:#ffe27a;font-size:13px;margin-bottom:4px}
+  #installer button{font:bold 17px -apple-system,system-ui,sans-serif;color:#fff;background:#c8393b;border:2px solid #17151f;
+    border-radius:10px;padding:12px 26px}
+  @media (orientation:landscape) and (max-height:430px){#installer img{width:64px;height:64px}#installer h1{margin:6px 0 10px;font-size:20px}
+    #installer ol{margin-bottom:12px}#installer .boite{max-width:560px;padding:10px}}
+</style>
+</head>
+<body>
+<canvas id="jeu"></canvas>
+<img id="photo" alt="" style="position:fixed;display:none;opacity:0;transition:opacity .28s;pointer-events:none">
+<div id="sonde"></div>
+<div id="installer" role="dialog" aria-label="Installer le jeu"><div class="boite">
+  <img src="icones/icone-180.png" alt="">
+  <h1>Silence, ça vole !</h1>
+  <ol>
+    <li><svg viewBox="0 0 32 32" fill="none" stroke="#ffe27a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3v17M10 9l6-6 6 6"/><path d="M11 14H7v15h18V14h-4"/></svg><b>1</b>Partager<br><small>(ou ⋯ puis Partager)</small></li>
+    <li><svg viewBox="0 0 32 32" fill="none" stroke="#ffe27a" stroke-width="2.4" stroke-linecap="round"><rect x="4" y="4" width="24" height="24" rx="6"/><path d="M16 10v12M10 16h12"/></svg><b>2</b>Sur l'écran d'accueil</li>
+    <li><svg viewBox="0 0 32 32" fill="none" stroke="#ffe27a" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17l7 7 13-15"/></svg><b>3</b>Ajouter</li>
+  </ol>
+  <button id="jouer-ici" type="button">▶ Jouer ici</button>
+</div></div>
+<div id="tourne">Tourne ton téléphone<br>en paysage</div>
+<script src="iphone.js"></script>
+<script src="js/base.js"></script>
+<script src="js/textes_modifies.js"></script>
+<script src="js/ambiances.js"></script>
+<script src="js/photos.js"></script>
+<script src="js/gains.js"></script>
+<script src="js/classement.js"></script>
+<script src="js/hero.js"></script>
+<script src="js/deguisements.js"></script>
+<script src="js/deguisements2.js"></script>
+<script src="js/speciaux.js"></script>
+<script src="js/people.js"></script>
+<script src="js/gags.js"></script>
+<script src="js/decor.js"></script>
+<script src="js/lumiere.js"></script>
+<script src="js/effets.js"></script>
+<script src="js/interactions.js"></script>
+<script src="js/vie.js"></script>
+<script src="js/vie_france.js"></script>
+<script src="js/vie_desert.js"></script>
+<script src="js/vie_mer.js"></script>
+<script src="js/vie_nature.js"></script>
+<script src="js/vie_villes.js"></script>
+<script src="js/vie_ouest.js"></script>
+<script src="js/structures.js"></script>
+<script src="js/titres.js"></script>
+<script src="js/scenes.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/boss.js"></script>
+<script src="js/game.js"></script>
+<script src="js/medailles.js"></script>
+<script src="js/render.js"></script>
+<script src="js/main_tuto.js"></script>
+<script src="js/ui.js"></script>
+<script>G.UI.init();</script>
+</body>
+</html>
