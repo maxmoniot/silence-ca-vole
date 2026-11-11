@@ -327,7 +327,7 @@
     W.lieuCourant = lieuNouveau;
     if (!W.demo) {
       if (!G.sav.vus[sc.id]) {
-        G.sav.vus[sc.id] = 1; W.nouveaux.push(sc.id); G.sauver();
+        G.sav.vus[sc.id] = 1; W.nouveaux.push(sc.id); mission('decors', 1); G.sauver();
         const n = Object.keys(G.sav.vus).length;
         
       }
@@ -1633,7 +1633,7 @@
       // le souffle du drone : ca decoiffe (et ca fait rire)
       if (!W.demo && !f.tombe && !f.souffle && !f.nageur && !f.nage && W.vivant && W.y > G.SOL - (f.s ? 52 : 34) && Math.abs(f.x - HX) < (f.s ? 44 : 26) && !f.gag) {
         f.souffle = true;
-        W.renverses++;
+        W.renverses++; mission('renverses', 1);
         if (f.d) {
           if (Math.random() < .6) { faireTomber(f); bulleFig(f, pick(['Hé !', 'Mon chapeau !', 'Aaaah !', 'Ouille !', 'Malotru !', 'Ça va pas ?'])); }
           else { f.pose = 'panique'; f.v = 120; bulleFig(f, pick(['Au secours !', 'Fuyez !', 'Il est fou !'])); }
@@ -2564,33 +2564,79 @@
 
   /* ---- Missions (la feuille de service) ---- */
   const POOL = [
-    { k: 'frole', n: 'Frôler {n} obstacles', v: [5, 10, 20] },
-    { k: 'plans', n: 'Réussir {n} plans', v: [1, 2, 4] },
-    { k: 'detruit', n: 'Détruire {n} obstacles', v: [5, 15, 30] },
-    { k: 'bobines', n: 'Ramasser {n} bobines', v: [60, 150, 300] },
-    { k: 'ras', n: 'Voler {n} s au ras du sol', v: [4, 8, 14] },
-    { k: 'surf', n: 'Surfer sur {n} baleines', v: [1, 1, 2] },
-    { k: 'grosses', n: 'Prendre {n} grosses bobines', v: [1, 3, 5] },
-    { k: 'tortues', n: 'Saluer {n} tortues copines', v: [1, 3, 5] },
-    { k: 'plonge', n: 'Plonger {n} fois', v: [1, 2, 3] },
-    { k: 'pouvoirs', n: 'Prendre {n} bonus', v: [2, 4, 7] },
-    { k: 'action', n: 'Écrire ACTION {n} fois', v: [1, 1, 2] },
-    { k: 'dist', n: 'Parcourir {n} m', v: [400, 900, 1600] },
-    { k: 'decors', n: 'Découvrir {n} décors', v: [2, 3, 5] },
-    { k: 'renverses', n: 'Décoiffer {n} figurants', v: [3, 6, 12] },
+    { k: 'frole', n: 'Frôler {n} obstacles' },
+    { k: 'plans', n: 'Réussir {n} plans' },
+    { k: 'detruit', n: 'Détruire {n} obstacles' },
+    { k: 'bobines', n: 'Ramasser {n} bobines' },
+    { k: 'ras', n: 'Voler {n} s au ras du sol' },
+    { k: 'surf', n: 'Surfer sur {n} baleines' },
+    { k: 'grosses', n: 'Prendre {n} grosses bobines' },
+    { k: 'tortues', n: 'Saluer {n} tortues copines' },
+    { k: 'plonge', n: 'Plonger {n} fois' },
+    { k: 'pouvoirs', n: 'Prendre {n} bonus' },
+    { k: 'action', n: 'Écrire ACTION {n} fois' },
+    { k: 'dist', n: 'Parcourir {n} m' },
+    { k: 'decors', n: 'Découvrir {n} décors' },
+    { k: 'renverses', n: 'Décoiffer {n} figurants' },
     // la deuxieme liste (Max, 08/11/2026 : « double la liste (mets 24 objectifs) ») : chacune avance par un geste du jeu
-    { k: 'lettres', n: 'Ramasser {n} lettres', v: [2, 4, 7] },
-    { k: 'coeurs', n: 'Ramasser {n} cœurs', v: [1, 2, 3] },
-    { k: 'roquettes', n: 'Tirer {n} roquettes', v: [1, 3, 6] },
-    { k: 'ralenti', n: 'Déclencher {n} ralentis', v: [1, 2, 3] },
-    { k: 'turbo', n: 'Foncer {n} s en turbo', v: [2, 4, 7] },
-    { k: 'bouclier', n: 'Parer {n} chocs au bouclier', v: [1, 2, 4] },
-    { k: 'combo', n: 'Faire un combo de {n}', v: [3, 5, 8] },
-    { k: 'boss', n: 'Filmer {n} animaux rares', v: [1, 2, 3] },
-    { k: 'barrage', n: 'Survivre à {n} barrages', v: [1, 2, 4] },
-    { k: 'sousEau', n: 'Parcourir {n} m sous l\'eau', v: [150, 400, 800] },
-    { k: 'sansChoc', n: 'Parcourir {n} m sans choc', v: [400, 900, 1600] },
+    { k: 'lettres', n: 'Ramasser {n} lettres' },
+    { k: 'coeurs', n: 'Ramasser {n} cœurs' },
+    { k: 'roquettes', n: 'Tirer {n} roquettes' },
+    { k: 'ralenti', n: 'Déclencher {n} ralentis' },
+    { k: 'turbo', n: 'Foncer {n} s en turbo' },
+    { k: 'bouclier', n: 'Parer {n} chocs au bouclier' },
+    { k: 'combo', n: 'Faire un combo de {n}' },
+    { k: 'boss', n: 'Filmer {n} animaux rares' },
+    { k: 'barrage', n: 'Survivre à {n} barrages' },
+    { k: 'sousEau', n: 'Parcourir {n} m sous l\'eau' },
+    { k: 'sansChoc', n: 'Parcourir {n} m sans choc' },
   ];
+  /* Ce que demande un objectif (11/11/2026). Max : « plusieurs beta testeurs qui ont relativement peu joue sont deja au niveau Palme
+     d'or. Ils ont gagne beaucoup d'XP trop rapidement d'un coup ». Depuis la 1.19, chaque objectif rapporte 400 a 4 000 xp (x 10), vingt-
+     quatre sont en cours et ils comptent d'une partie a l'autre, mais chacun ne demandait que ce qu'une seule partie fait deja
+     (« Ramasser 300 bobines », « Frôler 20 obstacles ») : une partie en reussissait 5 a 10 (7 000 a 13 000 xp, l'Oscar en 15 parties
+     moyennes au lieu de 200 a 300, la regle de Max du 08/11). L'experience des objectifs ne change pas ; c'est ce qu'ils demandent :
+     - un objectif se mesure en metres de jeu : il demande ce que CE joueur fait, en moyenne, sur cette distance (sa mesure, G.sav.act
+       et G.sav.actDist, melangee au depart a celle d'une partie moyenne de 2 500 m, PARTIE) ; on le remplit donc en jouant, quel que
+       soit son style ;
+     - un objectif qui remplace un objectif reussi demande environ 115 km (environ 45 parties moyennes) : vingt-quatre en cours,
+       un peu plus d'un tous les deux parties, soit environ 900 xp par partie moyenne avec la distance et les plans (tests/paliers_xp.js) ;
+     - au depart, les vingt-quatre sont etages de 1,5 km a 96 km (ECHELLE) : le premier vient des la premiere partie (le premier rang),
+       puis un par partie, puis un toutes les deux ou trois ; le niveau (et donc l'experience, J.XP_MISSION) suit la distance demandee
+       (nivDe : moins de 8 km, moins de 30 km, au-dela) ;
+     - le combo et la distance sans choc se battent en une partie : ce sont des records, qui montent a chaque reussite (RECORDS). */
+  // une partie moyenne de 2 500 m, entre ce que fait le robot prudent de tests/xp_nouveau_joueur.js --activite et un joueur qui va
+  // chercher bobines, lettres et bonus (tests/paliers_xp.js)
+  const PARTIE = {
+    frole: 20, plans: 3.5, detruit: 8, bobines: 450, ras: 7, surf: .17, grosses: 2.5, tortues: .5, plonge: .5, pouvoirs: 3, action: .15,
+    decors: 2.5, renverses: 9, lettres: 3.5, coeurs: .5, roquettes: 1.3, ralenti: .6, turbo: 2, bouclier: .6, boss: 1, barrage: 2.2, sousEau: 150,
+  };
+  const D_MISSION = J.D_MISSION = 115000;
+  const ECHELLE = J.ECHELLE = [1500, 4500, 7000, 10000, 13000, 16000, 19000, 23000, 27000, 31000, 35000, 39000, 43000, 47000, 51000, 56000,
+    61000, 66000, 71000, 76000, 81000, 86000, 91000, 96000];
+  // les sortes qui avancent dans toute partie prennent les premiers barreaux de l'echelle (une baleine ou une tortue, ce n'est pas sur)
+  const COURANTES = ['dist', 'bobines', 'frole', 'renverses', 'plans', 'barrage', 'decors', 'detruit', 'ras'];
+  const RECORDS = J.RECORDS = { combo: [4, 5, 6, 8, 10, 12, 15, 18, 22, 26, 30], sansChoc: [500, 700, 900, 1200, 1500, 2000, 2500, 3200, 4000, 5000, 6500] };
+  const nivDe = metres => metres < 8000 ? 0 : metres < 30000 ? 1 : 2;
+  // ce que ce joueur fait, par metre de jeu, pour une sorte (dix kilometres de partie moyenne au depart, que sa mesure remplace peu a peu)
+  const parMetre = J.parMetre = k => k === 'dist' ? 1 : (((G.sav.act || {})[k] || 0) + (PARTIE[k] || 1) * 4) / ((G.sav.actDist || 0) + 10000);
+  const joli = v => {
+    if (v < 12) return Math.max(1, Math.round(v));
+    if (v < 100) return Math.round(v / 5) * 5;
+    if (v < 1000) return Math.round(v / 10) * 10;
+    const p = Math.pow(10, Math.floor(Math.log10(v)) - 1);
+    return Math.round(v / p) * p;
+  };
+  // les decors pas encore decouverts (on ne demande jamais d'en decouvrir plus qu'il n'en reste)
+  const restants = () => {
+    const vus = G.sav.vus || {}, meta = D.META && Object.keys(D.META).length ? D.META : null;
+    return Object.keys(G.SCENES).filter(id => !vus[id] && !G.SCENES[id].debut && (!meta || meta[G.SCENES[id].plaque || id])).length;
+  };
+  const butPour = J.butPour = (k, d) => {
+    if (RECORDS[k]) { const l = RECORDS[k], n = (G.sav.recM || {})[k] || 0; return n < l.length ? l[n] : joli(l[l.length - 1] * Math.pow(1.2, n - l.length + 1)); }
+    const n = joli(parMetre(k) * d);
+    return k === 'decors' ? Math.max(1, Math.min(n, restants())) : n;
+  };
   /* Ce que rapporte une mission, en bobines : 40, 80 ou 120 selon le niveau. « Ecrire ACTION » est presque impossible (Max,
      07/11/2026 : « il faut que la recompense soit forte ») : 400, 600 ou 800, plus qu'une bonne partie (340). */
   const recompenseMission = J.recompenseMission = (k, niv) => k === 'action' ? 400 + niv * 200 : 40 + niv * 40;
@@ -2620,16 +2666,34 @@
     ['lettres', 'lettre'], ['cœurs', 'cœur'], ['roquettes', 'roquette'], ['ralentis', 'ralenti'], ['chocs', 'choc'],
     ['animaux rares', 'animal rare'], ['barrages', 'barrage'], ['obstacles', 'obstacle'], ['figurants', 'figurant'], ['décors', 'décor']];
   const accorder = t => SING.reduce((s, [a, b]) => s.replace(new RegExp('(^|\\s)1 ' + a + '(?=\\s|$)'), (_, d) => d + '1 ' + b), t);
-  // un objectif d'une sorte, a un niveau (n : un autre but, pour les controles)
+  // le but s'ecrit avec ses milliers (« Ramasser 12 000 bobines »)
+  const texteMission = (p, n) => accorder(p.n.replace('{n}', String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')));
+  const objectif = (p, n, niv) => ({ k: p.k, txt: texteMission(p, n), but: n, p: 0, niv, r: recompenseMission(p.k, niv), xp: xpMission(p.k, niv) });
+  // un objectif d'une sorte, a un niveau (n : un autre but, pour les controles ; sinon ce que le joueur fait sur une distance du
+  // niveau : 2,5 km, 15 km ou 100 km)
   const missionDe = J.missionDe = (k, niv, n) => {
     const p = POOL.find(q => q.k === k);
     if (!p) return null;
-    n = n || p.v[niv];
-    return { k: p.k, txt: accorder(p.n.replace('{n}', n)), but: n, p: 0, niv, r: recompenseMission(p.k, niv), xp: xpMission(p.k, niv) };
+    return objectif(p, n || butPour(k, [2500, 15000, D_MISSION][niv] || D_MISSION), niv);
   };
+  // l'objectif d'une sorte qui demande ce que le joueur fait sur d metres de jeu (un record : le barreau suivant de son echelle)
+  const missionPour = J.missionPour = (k, d) => {
+    const p = POOL.find(q => q.k === k);
+    if (!p) return null;
+    if (RECORDS[k]) { const n = (G.sav.recM || {})[k] || 0; return objectif(p, butPour(k), n === 0 ? 0 : n < 4 ? 1 : 2); }
+    return objectif(p, butPour(k, d), nivDe(d));
+  };
+  // les sortes qu'on peut tirer : chacune une seule fois dans la liste, et plus de « Decouvrir » quand tout est decouvert
+  const tirables = sauf => POOL.map(p => p.k).filter(k => !sauf.includes(k) && (k !== 'decors' || restants() > 0));
   function nouvelleMission() {
-    const deja = (G.sav.missions || []).map(m => m.k);
-    return missionDe(pick(POOL.filter(p => !deja.includes(p.k))).k, Math.min(2, (G.sav.rang / 4) | 0));
+    const l = tirables((G.sav.missions || []).map(m => m.k));
+    return l.length ? missionPour(pick(l), D_MISSION * (.75 + Math.random() * .5)) : null;
+  }
+  const melange = l => l.map(k => [Math.random(), k]).sort((a, b) => a[0] - b[0]).map(q => q[1]);
+  // l'echelle du depart : les sortes les plus courantes sur les premiers barreaux, chacune demande la distance de son barreau
+  function etager(sortes) {
+    const c = melange(sortes.filter(k => COURANTES.includes(k))), a = melange(sortes.filter(k => !COURANTES.includes(k)));
+    return c.concat(a).map((k, i) => missionPour(k, ECHELLE[Math.min(i, ECHELLE.length - 1)]));
   }
   /* Douze missions en meme temps (Max, 08/11/2026 : « fais en sorte que les actions qui font gagner des XP soient une liste qu'on peut
      faire defiler (pour le moment il n'y en a que 3). Il faudrait qu'il y en ait au moins 12 ») : douze sortes differentes sur les
@@ -2638,16 +2702,40 @@
   const NB_MISSIONS = J.NB_MISSIONS = 24;
   J.completerMissions = () => {
     if (!G.sav.missions) G.sav.missions = [];
+    /* Une fois par sauvegarde : une sauvegarde neuve recoit l'echelle du depart ; une sauvegarde d'avant le 11/11/2026 aussi (ses
+       objectifs, faciles, prennent les buts d'aujourd'hui, chacun garde ce qu'il a deja fait ; un objectif deja reussi reste a payer). */
+    if (!G.sav.objectifs2) {
+      G.sav.objectifs2 = 1;
+      const faits = G.sav.missions.filter(m => m.fait), encours = G.sav.missions.filter(m => !m.fait);
+      const sortes = encours.map(m => m.k).filter((k, i, l) => l.indexOf(k) === i);
+      for (const k of melange(tirables(sortes.concat(faits.map(m => m.k))))) if (faits.length + sortes.length < NB_MISSIONS) sortes.push(k);
+      const neufs = etager(sortes).map(m => {
+        const a = encours.find(q => q.k === m.k);
+        if (!a || !(a.p > 0)) return m;
+        // un record : son echelle commence au-dessus du meilleur deja fait (sinon il serait reussi d'office)
+        if (RECORDS[m.k]) {
+          const r = G.sav.recM || (G.sav.recM = {});
+          let n = 0; while (butPour(m.k) <= a.p && n++ < 40) r[m.k] = (r[m.k] || 0) + 1;
+          m = missionPour(m.k, 0); m.p = a.p; return m;
+        }
+        // ce qui est deja fait compte, sans payer d'office un objectif du jour (au plus les neuf dixiemes)
+        m.p = Math.min(a.p, Math.floor(m.but * .9)); return m;
+      });
+      G.sav.missions = faits.concat(neufs);
+    }
     J.normaliserMissions();
     let n = 0;
-    while (G.sav.missions.length < NB_MISSIONS && n++ < 40) G.sav.missions.push(nouvelleMission());
+    while (G.sav.missions.length < NB_MISSIONS && n++ < 40) { const m = nouvelleMission(); if (!m) break; G.sav.missions.push(m); }
   };
   function missionsDebut() {
     J.completerMissions();
     G.sauver();
   }
   function mission(k, d) {
-    if (W.demo || !G.sav.missions) return;
+    if (W.demo) return;
+    // ce que fait le joueur, sorte par sorte (sa mesure, versee dans la sauvegarde a la fin de la partie : finMissions)
+    if (d > 0) { const a = W.act || (W.act = {}); a[k] = (a[k] || 0) + d; }
+    if (!G.sav.missions) return;
     for (const m of G.sav.missions) {
       if (m.k !== k || m.fait) continue;
       m.p += d;
@@ -2675,17 +2763,23 @@
     }
   }
   J.finMissions = () => {
-    // verifie ce qui se mesure a la fin de la partie
     if (!G.sav.missions) return [];
-    mission('dist', 0);
-    for (const m of G.sav.missions) {
-      if (m.fait) continue;
-      if (m.k === 'dist' && W.dist >= m.but) m.fait = true;
-      if (m.k === 'decors' && W.nouveaux.length >= m.but) m.fait = true;
-      if (m.k === 'renverses' && W.renverses >= m.but) m.fait = true;
+    // la distance de la partie : « Parcourir n m » compte d'une partie a l'autre, comme les autres (apres une reprise, seulement ce qui
+    // s'est ajoute depuis la premiere fin), et la mesure du joueur (G.sav.act, G.sav.actDist : parMetre) prend la partie
+    const d = Math.max(0, W.dist - (W.distMis || 0)); W.distMis = W.dist;
+    mission('dist', d);
+    if (!W.demo) {
+      G.sav.actDist = (G.sav.actDist || 0) + d;
+      const a = G.sav.act || (G.sav.act = {});
+      for (const k in W.act || {}) if (k !== 'dist') a[k] = (a[k] || 0) + W.act[k];
+      W.act = {};
     }
     const finies = G.sav.missions.filter(m => m.fait);
-    for (const m of finies) { G.gagne(m.r); G.sav.rang++; W.xpMissions = (W.xpMissions || 0) + (m.xp || xpMission(m.k, m.niv)); }
+    for (const m of finies) {
+      G.gagne(m.r); G.sav.rang++; W.xpMissions = (W.xpMissions || 0) + (m.xp || xpMission(m.k, m.niv));
+      // un record battu : le suivant demande plus
+      if (RECORDS[m.k]) { const r = G.sav.recM || (G.sav.recM = {}); r[m.k] = (r[m.k] || 0) + 1; }
+    }
     G.sav.missions = G.sav.missions.filter(m => !m.fait);
     J.completerMissions();
     G.sauver();
