@@ -11,9 +11,9 @@
 <meta name="apple-mobile-web-app-title" content="Silence ça vole">
 <meta name="theme-color" content="#0a0a10">
 <meta name="format-detection" content="telephone=no">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icones/icone-180.png">
-<link rel="icon" href="icones/icone-192.png">
+<link rel="manifest" href="manifest.webmanifest?v=7a94d1039f">
+<link rel="apple-touch-icon" href="icones/icone-180.png?v=100d54e658">
+<link rel="icon" href="icones/icone-192.png?v=d2b690052f">
 <style>
   html,body{margin:0;height:100%;background:#0a0a10;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none}
   #jeu{position:fixed;top:0;right:0;bottom:0;left:0;width:100vw;height:100vh;display:block;image-rendering:pixelated;image-rendering:crisp-edges;image-rendering:pixelated;touch-action:none}
@@ -38,6 +38,8 @@
   #installer .appli{display:none;margin:0 0 14px;padding:10px 12px;border:1px solid #ffe27a;border-radius:12px;font-size:15px}
   #installer.dans-appli .appli{display:block}
   #installer .appli b{color:#ffe27a}
+  #installer .sur-mac,#installer.mac .sur-ios,#installer.mac .appli{display:none}
+  #installer.mac .sur-mac{display:flex}
   @media (orientation:landscape) and (max-height:430px){#installer img{width:64px;height:64px}#installer h1{margin:6px 0 10px;font-size:20px}
     #installer ol{margin-bottom:12px}#installer .boite{max-width:560px;padding:10px}}
 </style>
@@ -47,51 +49,24 @@
 <img id="photo" alt="" style="position:fixed;display:none;opacity:0;transition:opacity .28s;pointer-events:none">
 <div id="sonde"></div>
 <div id="installer" role="dialog" aria-label="Installer le jeu"><div class="boite">
-  <img src="icones/icone-180.png" alt="">
+  <img src="icones/icone-180.png?v=100d54e658" alt="">
   <h1>Silence, ça vole !</h1>
   <p class="appli">D'abord, ouvrez ce lien dans <b>Safari</b> :<br><b>⋯</b> puis « Ouvrir dans le navigateur »</p>
-  <ol>
+  <ol class="sur-ios">
     <li><svg viewBox="0 0 32 32" fill="none" stroke="#ffe27a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3v17M10 9l6-6 6 6"/><path d="M11 14H7v15h18V14h-4"/></svg><b>1</b>Partager<br><small>(ou ⋯ puis Partager)</small></li>
     <li><svg viewBox="0 0 32 32" fill="none" stroke="#ffe27a" stroke-width="2.4" stroke-linecap="round"><rect x="4" y="4" width="24" height="24" rx="6"/><path d="M16 10v12M10 16h12"/></svg><b>2</b>Sur l'écran d'accueil</li>
+    <li><svg viewBox="0 0 32 32" fill="none" stroke="#ffe27a" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17l7 7 13-15"/></svg><b>3</b>Ajouter</li>
+  </ol>
+  <ol class="sur-mac">
+    <li><svg viewBox="0 0 32 32" fill="none" stroke="#ffe27a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h11l6 6v18H8z"/><path d="M19 4v6h6"/></svg><b>1</b>Fichier<br><small>(ou Partager)</small></li>
+    <li><svg viewBox="0 0 32 32" fill="none" stroke="#ffe27a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="20" width="26" height="8" rx="3"/><rect x="12" y="8" width="8" height="8" rx="2"/><path d="M16 4v2"/></svg><b>2</b>Ajouter au Dock</li>
     <li><svg viewBox="0 0 32 32" fill="none" stroke="#ffe27a" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17l7 7 13-15"/></svg><b>3</b>Ajouter</li>
   </ol>
   <button id="jouer-ici" type="button">▶ Jouer ici</button>
 </div></div>
 <div id="tourne">Tourne ton téléphone<br>en paysage</div>
-<script src="iphone.js"></script>
-<script src="js/base.js"></script>
-<script src="js/textes_modifies.js"></script>
-<script src="js/ambiances.js"></script>
-<script src="js/photos.js"></script>
-<script src="js/gains.js"></script>
-<script src="js/classement.js"></script>
-<script src="js/hero.js"></script>
-<script src="js/deguisements.js"></script>
-<script src="js/deguisements2.js"></script>
-<script src="js/speciaux.js"></script>
-<script src="js/people.js"></script>
-<script src="js/gags.js"></script>
-<script src="js/decor.js"></script>
-<script src="js/lumiere.js"></script>
-<script src="js/effets.js"></script>
-<script src="js/interactions.js"></script>
-<script src="js/vie.js"></script>
-<script src="js/vie_france.js"></script>
-<script src="js/vie_desert.js"></script>
-<script src="js/vie_mer.js"></script>
-<script src="js/vie_nature.js"></script>
-<script src="js/vie_villes.js"></script>
-<script src="js/vie_ouest.js"></script>
-<script src="js/structures.js"></script>
-<script src="js/titres.js"></script>
-<script src="js/scenes.js"></script>
-<script src="js/audio.js"></script>
-<script src="js/boss.js"></script>
-<script src="js/game.js"></script>
-<script src="js/medailles.js"></script>
-<script src="js/render.js"></script>
-<script src="js/main_tuto.js"></script>
-<script src="js/ui.js"></script>
-<script>G.UI.init();</script>
+<script src="iphone.js?v=ee11f4e07b"></script>
+<script src="jeu.js?v=c641715105"></script>
+<script>SCV_IPHONE.demarrer(function () { G.UI.init(); });</script>
 </body>
 </html>

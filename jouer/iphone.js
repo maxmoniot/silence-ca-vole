@@ -10,8 +10,10 @@
       plan. Chaque contexte audio créé par le jeu est noté et repris au toucher suivant.
    3. Les gestes de Safari : pas de zoom à deux doigts ni au double appui, pas de loupe ni de menu à l'appui long.
    4. L'écran reste allumé pendant qu'on joue (verrou d'écran, repris au retour dans l'appli).
-   5. Hors ligne : le service sw.js garde tout le jeu sur le téléphone (d'abord les scripts, puis toutes les images en arrière-plan).
-   6. Dans Safari (pas encore sur l'écran d'accueil) : une fenêtre montre les trois gestes pour l'installer, ou « Jouer ici ».
+   5. Hors ligne : le service sw.js garde tout le jeu sur l'appareil (d'abord la page et le jeu, puis les images en arrière-plan, par
+      paquets) ; à la première visite, le jeu attend qu'il soit aux commandes (I.demarrer) : très peu de demandes au serveur.
+   6. Sur un appareil Apple, dans Safari (pas encore installé) : une fenêtre montre les trois gestes pour l'installer, ou « Jouer
+      ici » : iPhone et iPad (écran d'accueil), Mac avec Safari 17 ou plus (Fichier › Ajouter au Dock). Ailleurs, le jeu tout de suite.
    Contrôle : tests/iphone.js. */
 (function () {
   'use strict';
@@ -19,6 +21,9 @@
   const ua = navigator.userAgent || '';
   // l'iPad se présente comme un Mac depuis iPadOS 13 : un « Mac » tactile est un iPad
   I.ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  // un Mac avec Safari 17 ou plus (macOS Sonoma) : « Ajouter au Dock » en fait une appli, comme l'écran d'accueil d'un iPhone
+  const vSafari = /Version\/(\d+)[\d.]* (Mobile\/\S+ )?Safari/.exec(ua);
+  I.mac = /Macintosh/.test(ua) && !I.ios && !!vSafari && +vSafari[1] >= 17 && !/Chrome|Chromium|CriOS|FxiOS|Firefox|Edg|OPR/.test(ua);
   I.dansAppli = /FBAN|FBAV|FB_IAB|Instagram|Snapchat|musical_ly|Bytedance|TikTok|Line\/|LinkedInApp|Pinterest|GSA\//.test(ua);
   I.installe = navigator.standalone === true || (window.matchMedia && matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches);
 
@@ -87,21 +92,38 @@
   }
   document.addEventListener('visibilitychange', () => { if (!document.hidden) { garderEcran(); majEncoches(); } });
 
-  /* 5. Hors ligne */
+  /* 5. Hors ligne, et peu de demandes au serveur (Max, 12/11/2026 : en classe, GitHub Pages a refusé le 4e élève, tout le collège
+     sortant par la même adresse) : à la première visite, le jeu ne démarre (G.UI.init, I.demarrer) qu'une fois le service sw.js
+     aux commandes, pour que chaque image passe par lui et voyage dans son paquet (une demande pour des centaines d'images) ; sans
+     service (navigation privée, vieux navigateur, refus), le jeu démarre quand même, au plus tard 6 s après. */
   I.hors = { fait: 0, total: 0, fini: false };
-  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.addEventListener('message', e => {
-        const m = e.data || {};
-        if (m.type === 'avance') { I.hors.fait = m.fait; I.hors.total = m.total; I.hors.fini = m.fait >= m.total; }
-      });
-      navigator.serviceWorker.register('sw.js').then(() => navigator.serviceWorker.ready).then(r => {
+  const sw = 'serviceWorker' in navigator && location.protocol !== 'file:';
+  let attendreService = sw && !navigator.serviceWorker.controller;
+  const enAttente = [];
+  const lancer = () => { attendreService = false; while (enAttente.length) { try { enAttente.shift()(); } catch (e) { setTimeout(() => { throw e; }); } } };
+  I.demarrer = f => { if (attendreService) enAttente.push(f); else f(); };
+  if (attendreService) setTimeout(lancer, 6000);
+  if (sw) {
+    navigator.serviceWorker.addEventListener('controllerchange', lancer);
+    let relance = null;
+    const toutDemander = () => navigator.serviceWorker.ready.then(r => { if (r.active) r.active.postMessage({ type: 'tout' }); }).catch(() => { });
+    navigator.serviceWorker.addEventListener('message', e => {
+      const m = e.data || {};
+      if (m.type !== 'avance') return;
+      I.hors.fait = m.fait; I.hors.total = m.total; I.hors.fini = m.fait >= m.total;
+      // le serveur a refusé (trop de demandes) : on redemande plus tard, sans insister
+      if (m.fin && !I.hors.fini && !relance) relance = setTimeout(() => { relance = null; toutDemander(); }, 90000);
+    });
+    const inscrire = () => {
+      navigator.serviceWorker.register('sw.js').then(() => {
         // toutes les images, en arrière-plan, sans gêner le chargement du jeu
-        setTimeout(() => { if (r.active) r.active.postMessage({ type: 'tout' }); }, 4000);
-      }).catch(() => { });
+        setTimeout(toutDemander, 4000);
+      }).catch(lancer);
       // le stockage ne doit pas être vidé par le système
       if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => { });
-    });
+    };
+    // après le chargement de la page : le service reprend alors le jeu et les icônes dans le cache du navigateur, sans les redemander
+    if (document.readyState === 'complete') inscrire(); else window.addEventListener('load', inscrire);
   }
 
   /* 6. La fenêtre d'installation, dans Safari seulement */
@@ -110,7 +132,8 @@
     if (!f) return;
     let vu = false;
     try { vu = sessionStorage.getItem('scv.jouerIci') === '1'; } catch (e) { /* navigation privée */ }
-    if (I.ios && !I.installe && !vu) f.classList.add('ouvert');
+    if ((I.ios || I.mac) && !I.installe && !vu) f.classList.add('ouvert');
+    if (I.mac) f.classList.add('mac');
     // le navigateur d'une appli (Instagram, Facebook, TikTok, Snapchat, Google…) n'a pas « Sur l'écran d'accueil » : d'abord Safari
     if (I.dansAppli) f.classList.add('dans-appli');
     document.getElementById('jouer-ici').addEventListener('click', () => {

@@ -4,11 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Silence, ça vole !</title>
-<meta name="description" content="Rejoignez Max, cadreur sur un drone : tout voir, tout comprendre, tout filmer. Un jeu en pixel art, sur Android, iPhone et iPad.">
+<meta name="description" content="Rejoignez Max, cadreur sur un drone : tout voir, tout comprendre, tout filmer. Un jeu en pixel art, sur Android, iPhone, iPad et dans le navigateur.">
 <link rel="icon" href="icone.png">
 <link rel="apple-touch-icon" href="jouer/icones/icone-180.png">
 <script>
-  // un iPhone ou un iPad va droit au jeu, qui lui propose d'ajouter son icône sur l'écran d'accueil (« ?reste » garde cette page)
+  // un iPhone ou un iPad va droit au jeu, qui lui propose d'ajouter son icône sur l'écran d'accueil (« ?reste » garde cette page) ;
+  // ailleurs, « Jouer dans le navigateur » mène au même jeu, qui reconnaît lui-même un appareil Apple (Mac avec Safari : Ajouter au Dock)
   (function () {
     var ua = navigator.userAgent || '';
     var ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
@@ -37,7 +38,7 @@
   <p>Rejoignez Max, cadreur sur un drone : tout voir, tout comprendre, tout filmer.</p>
   <div class="boutons">
     <a class="jouer" href="https://play.google.com/store/apps/details?id=fr.maxmoniot.silencecavole">Sur Google Play</a>
-    <a class="jouer" href="jouer/">Sur iPhone et iPad</a>
+    <a class="jouer" href="jouer/">Jouer dans le navigateur</a>
   </div>
   <footer><a href="confidentialite.html">Règles de confidentialité</a> · max.moniot@gmail.com</footer>
 </main>
